@@ -1,6 +1,6 @@
 FROM ubuntu:focal as builder
 
-ARG MYSQL_VERSION=8.0.25
+ARG MYSQL_VERSION=8.0.33
 
 WORKDIR /root
 
