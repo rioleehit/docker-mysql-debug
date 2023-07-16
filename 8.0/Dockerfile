@@ -14,14 +14,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt install build-essential wget curl libncur
 
 #    wget https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-boost-${MYSQL_VERSION}.tar.gz && \
 
-RUN ADD mysql-boost-${MYSQL_VERSION}.tar.gz && \
-    tar zxf mysql-boost-${MYSQL_VERSION}.tar.gz && \
-    cd mysql-${MYSQL_VERSION} && \
-    CFLAGS=-O0 cmake -DWITH_DEBUG=1 -DFORCE_INSOURCE_BUILD=1 -DWITH_INNODB_EXTRA_DEBUG=1 -DCMAKE_INSTALL_PREFIX=/mysql-debug -DDOWNLOAD_BOOST=1 -DWITH_BOOST=./boost && \
-    make -j$(getconf _NPROCESSORS_ONLN) install && \
-    cd .. && \
-    rm -rf mysql-${MYSQL_VERSION}
-
+COPY mysql-boost-${MYSQL_VERSION}.tar.gz ./mysql-boost-${MYSQL_VERSION}.tar.gz
+RUN tar zxf ./mysql-boost-${MYSQL_VERSION}.tar.gz && \
+    ls -la 
+RUN cd mysql-${MYSQL_VERSION} && cmake ./ -DWITH_DEBUG=1 -DFORCE_INSOURCE_BUILD=1 -DWITH_INNODB_EXTRA_DEBUG=1 -DCMAKE_INSTALL_PREFIX=/mysql-debug -DDOWNLOAD_BOOST=1 -DWITH_BOOST=./boost && \
+    make install && \
+    cd .. 
+#RUN rm -rf mysql-${MYSQL_VERSION}
 WORKDIR /mysql-debug
 RUN ./bin/mysqld  --no-defaults --datadir=./data --basedir=./ --initialize-insecure
 
