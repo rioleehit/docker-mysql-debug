@@ -3,12 +3,18 @@ FROM ubuntu:focal as builder
 ARG MYSQL_VERSION=8.0.33
 
 WORKDIR /root
+COPY ./sources.list /etc/apt/sources.list
 
-RUN DEBIAN_FRONTEND=noninteractive && \ 
-    ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-    apt-get update -y && apt install cmake make gcc g++ openssl bison pkg-config -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install build-essential cmake wget curl libncurses5-dev libssl-dev -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' && \
-    wget https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-boost-${MYSQL_VERSION}.tar.gz && \
+RUN cat /etc/apt/sources.list
+RUN rm -Rf /var/lib/apt/lists/*
+RUN ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+RUN DEBIAN_FRONTEND=noninteractive apt update -y
+RUN DEBIAN_FRONTEND=noninteractive apt install cmake make gcc g++ openssl bison pkg-config -y
+RUN DEBIAN_FRONTEND=noninteractive apt install build-essential wget curl libncurses5-dev libssl-dev -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold'
+
+#    wget https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-boost-${MYSQL_VERSION}.tar.gz && \
+
+RUN ADD mysql-boost-${MYSQL_VERSION}.tar.gz && \
     tar zxf mysql-boost-${MYSQL_VERSION}.tar.gz && \
     cd mysql-${MYSQL_VERSION} && \
     CFLAGS=-O0 cmake -DWITH_DEBUG=1 -DFORCE_INSOURCE_BUILD=1 -DWITH_INNODB_EXTRA_DEBUG=1 -DCMAKE_INSTALL_PREFIX=/mysql-debug -DDOWNLOAD_BOOST=1 -DWITH_BOOST=./boost && \
